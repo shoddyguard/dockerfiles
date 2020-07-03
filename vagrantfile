@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Simple Vagrantfile enabling you to be able to play with Docker without having to fight with Virtualbox on Windows
+
+Vagrant.configure("2") do |config|
+    config.vm.provider "virtualbox" do |vb|
+      vb.memory = "4096"
+      vb.cpus = 4
+    end
+    # for Linux containers
+    config.vm.define "ubuntu" do |ub|
+      ub.vm.box = "bento/ubuntu-18.04"
+      ub.vm.provision "shell", inline: <<-SCRIPT
+        cd /tmp
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        sudo apt update
+        sudo apt install docker-ce -y
+        sudo usermod -G docker vagrant
+        SCRIPT
+    end
+    # for Windows containers
+    config.vm.define "windows" do |wi|
+      wi.vm.box = "gusztavvargadr/windows-server"
+      wi.vm.box_version = "1809.0.2006.standard-core"
+      wi.vm.synced_folder ".", "c:\\vagrant"
+      wi.vm.provision "shell", inline: <<-SCRIPT
+        $env:TEMP = (Get-Item $env:TEMP).FullName
+        Enable-WindowsOptionalFeature -Online -FeatureName containers -All -NoRestart
+        Install-PackageProvider -Name NuGet -Force
+        Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+        Install-Package -Name docker -ProviderName DockerMsftProvider -Force
+        SCRIPT
+      wi.vm.provision :reload # requires: vagrant plugin install vagrant-reload
+    end
+  end
