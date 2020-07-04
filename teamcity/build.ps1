@@ -11,7 +11,7 @@ param
     $push = $false
 )
 
-docker build -t "shoddyguard/teamcity-agent-chocolatey:$tag" -f 'teamcity/agent/chocolatey/Dockerfile' .
+docker build -t "shoddyguard/teamcity-agent-chocolatey:$tag" -f 'agent/chocolatey/Dockerfile' .
 if ($push)
 {
     docker push "shoddyguard/teamcity-agent-chocolatey"
