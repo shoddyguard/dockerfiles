@@ -3,8 +3,16 @@ param
 (
     [Parameter(Mandatory = $false)]
     [string]
-    $tag = 'latest'
+    $tag = 'latest',
+
+    # Whether to push to Docker Hub or not
+    [Parameter(Mandatory = $false)]
+    [boolean]
+    $push = $false
 )
 
 docker build -t "shoddyguard/teamcity-agent-chocolatey:$tag" -f 'teamcity/agent/chocolatey/Dockerfile' .
-docker push "shoddyguard/teamcity-agent-chocolatey"
+if ($push)
+{
+    docker push "shoddyguard/teamcity-agent-chocolatey"
+}
